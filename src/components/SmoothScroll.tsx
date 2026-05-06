@@ -1,33 +1,28 @@
 "use client";
 
-import { ReactLenis } from "lenis/react";
+import { ReactLenis, useLenis } from "lenis/react";
 import { useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import type Lenis from "lenis";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-export function SmoothScroll({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return;
+function ScrollSync() {
+  // sync GSAP ScrollTrigger to Lenis scroll events
+  useLenis(() => {
+    ScrollTrigger.update();
+  });
 
-    // sync Lenis ↔ GSAP ScrollTrigger
-    const update = (time: number) => {
-      ScrollTrigger.update();
-      // lenis raf is internal via ReactLenis; we just keep ST in sync via scroll event
-      void time;
-    };
-    gsap.ticker.add(update);
+  useEffect(() => {
     gsap.ticker.lagSmoothing(0);
-    return () => {
-      gsap.ticker.remove(update);
-    };
   }, []);
 
+  return null;
+}
+
+export function SmoothScroll({ children }: { children: React.ReactNode }) {
   return (
     <ReactLenis
       root
@@ -36,11 +31,8 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
         duration: 1.2,
         smoothWheel: true,
       }}
-      onScroll={(lenis: Lenis) => {
-        ScrollTrigger.update();
-        void lenis;
-      }}
     >
+      <ScrollSync />
       {children}
     </ReactLenis>
   );
