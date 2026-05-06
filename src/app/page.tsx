@@ -1,6 +1,7 @@
 import { Scene3D } from "@/components/Scene3D";
 import { Scenes } from "@/components/Scenes";
 import { Section } from "@/components/sections/Section";
+import { Hero } from "@/components/Hero";
 import Link from "next/link";
 
 const principles = [
@@ -20,54 +21,47 @@ export default function Home() {
         <Scenes />
       </Scene3D>
 
-      <main className="relative">
-        {/* 1. HERO */}
-        <Section id="hero" eyebrow="Hermes Trismegistus" title="As above, so below">
-          <p className="font-mono text-sm text-foreground/60">
-            Pixelpiraterij × Hermetiek
-          </p>
-          <p className="mt-8 text-foreground/50 text-sm">↓ scroll ↓</p>
-        </Section>
+      <main className="relative z-10">
+        {/* 1. HERO with seal */}
+        <Hero />
 
         {/* 2. EMERALD TABLET */}
-        <Section
-          id="tablet"
-          eyebrow="Tabula Smaragdina"
-          title="De Smaragden Tafel"
-        >
-          <p>
+        <Section id="tablet" eyebrow="Tabula Smaragdina" title="De Smaragden Tafel">
+          <p className="italic text-gold/70 font-mono text-base">
             Verum, sine mendacio, certum et verissimum.
           </p>
-          <p className="text-foreground/60">
+          <p className="text-foreground/70">
             Wat boven is, is gelijk aan wat beneden is — om het wonder van het Ene te volbrengen.
           </p>
         </Section>
 
         {/* 3. SEVEN PRINCIPLES */}
         <Section id="principles" eyebrow="Kybalion" title="De zeven principes">
-          <ul className="grid gap-4 md:grid-cols-2 text-left">
+          <ul className="grid gap-4 md:grid-cols-2 text-left mt-4">
             {principles.map((p, i) => (
               <li
                 key={p.name}
                 className="glyph-border rounded-sm p-5 backdrop-blur-sm bg-ink/40"
               >
-                <p className="font-mono text-xs text-gold/70 mb-2">
+                <p className="font-mono text-[0.65rem] tracking-[0.3em] text-gold/70 mb-2">
                   {String(i + 1).padStart(2, "0")} · {p.name.toUpperCase()}
                 </p>
-                <p className="text-foreground/80">{p.line}</p>
+                <p className="text-foreground/80 text-base">{p.line}</p>
               </li>
             ))}
           </ul>
         </Section>
 
-        {/* 4. ALCHEMICAL LAB — pixelpiraterij showcase */}
+        {/* 4. ALCHEMICAL LAB */}
         <Section id="lab" eyebrow="Opus Magnum" title="Het laboratorium">
-          <p>Reageerbuizen vol projecten. Elk een transmutatie van idee naar materie.</p>
+          <p className="text-foreground/70">
+            Reageerbuizen vol projecten. Elke vial een transmutatie van idee naar materie.
+          </p>
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             {[1, 2, 3].map((n) => (
               <div
                 key={n}
-                className="glyph-border aspect-[3/4] rounded-sm bg-ink/60 flex items-end p-4"
+                className="glyph-border aspect-[3/4] rounded-sm bg-ink/60 flex items-end p-4 hover:bg-ink/40 transition-colors"
               >
                 <p className="font-mono text-xs text-gold/60">PROJECT_{String(n).padStart(2, "0")}</p>
               </div>
@@ -77,15 +71,15 @@ export default function Home() {
 
         {/* 5. TRANSMUTATION */}
         <Section id="transmutation" eyebrow="Solve et Coagula" title="Transmutatie">
-          <p>Lood naar goud. Code naar ervaring. Stilte naar stem.</p>
+          <p className="text-foreground/70">Lood naar goud. Code naar ervaring. Stilte naar stem.</p>
         </Section>
 
         {/* 6. OUROBOROS */}
         <Section id="ouroboros" eyebrow="Ouroboros" title="De cirkel sluit">
-          <p>De slang verteert zichzelf. Einde wordt begin.</p>
+          <p className="text-foreground/70">De slang verteert zichzelf. Einde wordt begin.</p>
         </Section>
 
-        {/* 7. SANCTUM — login gate */}
+        {/* 7. SANCTUM */}
         <Section id="sanctum" eyebrow="Sanctum Sanctorum" title="Betreed de kamer">
           <p className="text-foreground/70">
             Voorbij deze drempel spreekt Hermes. Toegang via passkey.

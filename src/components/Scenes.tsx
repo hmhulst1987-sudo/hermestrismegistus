@@ -1,37 +1,33 @@
 "use client";
 
-import { Caduceus } from "./Caduceus";
 import { Stars } from "./Stars";
+import { GoldDust } from "./GoldDust";
 import { useScrollProgress } from "@/lib/useScrollProgress";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 
 /**
- * Master 3D timeline driven by global scroll progress (0..1).
- * Scenes appear/disappear by lerping group positions and visibility windows.
+ * Ambient cosmic environment. No hero geometry — the hero is HTML (the seal PNG).
+ * The canvas only provides depth/atmosphere across all sections.
  */
 export function Scenes() {
-  const heroRef = useRef<THREE.Group>(null!);
+  const tilt = useRef<THREE.Group>(null!);
   const progress = useScrollProgress();
 
   useFrame(() => {
-    if (heroRef.current) {
-      // hero zooms forward and fades as user scrolls past first viewport
+    if (tilt.current) {
+      // very subtle parallax tilt as user scrolls
       const p = progress.current;
-      const t = Math.min(1, p * 7); // hero owns first 1/7 of page
-      heroRef.current.position.z = THREE.MathUtils.lerp(0, 5, t);
-      heroRef.current.rotation.x = THREE.MathUtils.lerp(0, -0.4, t);
-      heroRef.current.scale.setScalar(THREE.MathUtils.lerp(1, 0.6, t));
+      tilt.current.rotation.y = THREE.MathUtils.lerp(tilt.current.rotation.y, p * 0.4, 0.05);
+      tilt.current.rotation.x = THREE.MathUtils.lerp(tilt.current.rotation.x, p * 0.15, 0.05);
     }
   });
 
   return (
-    <>
+    <group ref={tilt}>
       <Stars />
-      <group ref={heroRef}>
-        <Caduceus />
-      </group>
-    </>
+      <GoldDust count={600} />
+    </group>
   );
 }

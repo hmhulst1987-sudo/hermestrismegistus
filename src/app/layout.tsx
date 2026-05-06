@@ -37,7 +37,7 @@ export default function RootLayout({
       lang="nl"
       className={`${cinzel.variable} ${jetbrains.variable} antialiased`}
     >
-      <body className="bg-background text-foreground font-sans">
+      <body className="text-foreground font-sans">
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>
