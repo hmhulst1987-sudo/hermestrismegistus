@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cinzel, JetBrains_Mono } from "next/font/google";
+import { Cinzel, Marcellus, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SmoothScroll } from "@/components/SmoothScroll";
 
@@ -7,6 +7,12 @@ const cinzel = Cinzel({
   variable: "--font-cinzel",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+});
+
+const marcellus = Marcellus({
+  variable: "--font-marcellus",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 const jetbrains = JetBrains_Mono({
@@ -17,11 +23,11 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Hermes Trismegistus — As Above, So Below",
   description:
-    "Hermetic showcase by Pixelpiraterij. Seven scrolls of correspondence ending in the sanctum.",
+    "Een ritueel in zeven scrollen. Thoth bouwt de piramide; voorbij de capstone wacht het sanctum.",
   metadataBase: new URL("https://hermestrismegistus.nl"),
   openGraph: {
     title: "Hermes Trismegistus",
-    description: "As above, so below.",
+    description: "Quod superius, sicut inferius.",
     url: "https://hermestrismegistus.nl",
     siteName: "Hermes Trismegistus",
     locale: "nl_NL",
@@ -35,9 +41,9 @@ export default function RootLayout({
   return (
     <html
       lang="nl"
-      className={`${cinzel.variable} ${jetbrains.variable} antialiased`}
+      className={`${cinzel.variable} ${marcellus.variable} ${jetbrains.variable} antialiased`}
     >
-      <body className="text-foreground font-sans">
+      <body className="text-foreground font-serif">
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>
