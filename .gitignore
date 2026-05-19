@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local reference material — niet voor productie
+/inspiratie&referentie/
+gemini-code-*.sh

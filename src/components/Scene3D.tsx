@@ -1,59 +1,82 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { Environment, Lightformer } from "@react-three/drei";
-import { Suspense, type ReactNode } from "react";
+import { Suspense, useRef, useEffect, type ReactNode } from "react";
 
 /**
  * Single fixed full-viewport canvas for the whole site.
- * All 3D scenes mount inside via children. One WebGL context = stable perf.
- *
- * Lighting designed for warm Egyptian dusk: amber sun + cool sky fill +
- * lapis-tinted shadow. Procedural environment via Lightformers (no CDN).
+ * Optimised to prevent WebGL Context Lost on integrated / lower-end GPUs:
+ *  - DPR capped at 1.5 (was 2) — halves fill-rate on hi-DPI screens
+ *  - Shadow map 1024 (was 2048) — reduces VRAM pressure
+ *  - powerPreference "default" — "high-performance" can cause the driver
+ *    to aggressively reclaim the GPU context on Windows integrated graphics
+ *  - onContextLost handler prevents the default browser behaviour (which
+ *    permanently kills the canvas) and lets Three.js restore it automatically
  */
 export function Scene3D({ children }: { children?: ReactNode }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const canvas = el.querySelector("canvas");
+    if (!canvas) return;
+
+    const handleContextLost = (e: Event) => {
+      e.preventDefault(); // prevent permanent loss — Three.js will restore
+      console.warn("[Scene3D] WebGL context lost — will attempt restore");
+    };
+    const handleContextRestored = () => {
+      console.info("[Scene3D] WebGL context restored");
+    };
+
+    canvas.addEventListener("webglcontextlost", handleContextLost);
+    canvas.addEventListener("webglcontextrestored", handleContextRestored);
+    return () => {
+      canvas.removeEventListener("webglcontextlost", handleContextLost);
+      canvas.removeEventListener("webglcontextrestored", handleContextRestored);
+    };
+  }, []);
+
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none">
+    <div ref={containerRef} className="fixed inset-0 z-0 pointer-events-none">
       <Canvas
         camera={{ position: [0, 4, 16], fov: 42 }}
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
+        dpr={[1, 1.5]}
+        gl={{
+          antialias: true,
+          alpha: false,
+          powerPreference: "default",
+          toneMappingExposure: 1.0,
+        }}
         shadows
       >
-        <color attach="background" args={["#0d0a06"]} />
-        <fog attach="fog" args={["#0d0a06", 18, 50]} />
+        {/* Pale limestone haze */}
+        <fog attach="fog" args={["#ddd4b0", 45, 110]} />
 
         <Suspense fallback={null}>
-          {/* procedural Egyptian-dusk env for PBR reflections */}
-          <Environment resolution={256} environmentIntensity={0.55} background={false}>
-            <Lightformer form="rect" intensity={5} color="#ffd27a" scale={[8, 4, 1]} position={[8, 6, 4]} target={[0, 0, 0]} />
-            <Lightformer form="rect" intensity={2} color="#c44747" scale={[6, 3, 1]} position={[-6, 2, 4]} target={[0, 0, 0]} />
-            <Lightformer form="rect" intensity={1.5} color="#1c4f8c" scale={[8, 4, 1]} position={[0, 6, -8]} target={[0, 0, 0]} />
-            <Lightformer form="rect" intensity={0.8} color="#8b6f3a" scale={[10, 3, 1]} position={[0, -4, 6]} target={[0, 0, 0]} />
-          </Environment>
-
-          {/* warm amber key from upper-right (Egyptian sun) */}
+          {/* Egyptian noon sun */}
           <directionalLight
-            position={[8, 12, 6]}
-            intensity={1.6}
-            color="#ffd27a"
+            position={[6, 16, 5]}
+            intensity={2.2}
+            color="#fff8e8"
             castShadow
-            shadow-mapSize-width={2048}
-            shadow-mapSize-height={2048}
+            shadow-mapSize-width={1024}
+            shadow-mapSize-height={1024}
             shadow-camera-near={0.5}
-            shadow-camera-far={50}
-            shadow-camera-left={-12}
-            shadow-camera-right={12}
-            shadow-camera-top={12}
-            shadow-camera-bottom={-12}
-            shadow-bias={-0.0005}
+            shadow-camera-far={80}
+            shadow-camera-left={-20}
+            shadow-camera-right={20}
+            shadow-camera-top={20}
+            shadow-camera-bottom={-20}
+            shadow-bias={-0.0004}
           />
 
-          {/* cool fill from sky (lapis tint in shadow) */}
-          <directionalLight position={[-6, 8, -4]} intensity={0.4} color="#6b8aaf" />
+          {/* Sky bounce */}
+          <hemisphereLight color="#5888cc" groundColor="#c8a860" intensity={0.45} />
 
-          {/* warm bounce from sand */}
-          <hemisphereLight color="#ffd27a" groundColor="#5c4724" intensity={0.5} />
+          {/* Minimal ambient */}
+          <ambientLight intensity={0.10} />
 
           {children}
         </Suspense>

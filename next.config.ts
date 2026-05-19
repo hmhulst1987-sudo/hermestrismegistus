@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 import path from "node:path";
 
 const nextConfig: NextConfig = {
+  output: "export",
+  images: {
+    unoptimized: true,
+  },
   // Pin workspace root — user has another lockfile in C:\Users\Gebruiker\
   turbopack: {
     root: path.resolve(__dirname),

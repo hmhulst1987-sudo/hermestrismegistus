@@ -1,0 +1,10 @@
+.git
+.next
+out
+node_modules
+.env*
+inspiratie&referentie
+gemini-code-*.sh
+*.log
+README.md
+PRODUCT.md

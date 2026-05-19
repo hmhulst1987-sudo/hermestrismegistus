@@ -1,8 +1,9 @@
 import { Scene3D } from "@/components/Scene3D";
 import { Scenes } from "@/components/Scenes";
 import { AudioToggle } from "@/components/AudioToggle";
-import { Ankh, EyeOfHorus, FeatherMaat, FlowerOfLife, Ouroboros } from "@/components/glyphs/Glyph";
-import Link from "next/link";
+import { FlowerOfLife, Ouroboros } from "@/components/glyphs/Glyph";
+import { HeroSection } from "@/components/HeroSection";
+import { SanctumLoginButton } from "@/components/SanctumLoginButton";
 
 const principles = [
   { name: "Mentalisme", line: "Het Al is geest." },
@@ -24,36 +25,8 @@ export default function Home() {
       <AudioToggle scene="ambient" />
 
       <main className="relative z-10">
-        {/* ============= 1. INTRO (1 vh) ============= */}
-        <section className="min-h-screen flex flex-col items-center justify-center px-6 text-center relative">
-          <div className="relative">
-            <p className="font-mono text-[0.7rem] uppercase tracking-[0.5em] text-gold/70 mb-6">
-              Hermes Trismegistus
-            </p>
-            <h1 className="font-display text-4xl md:text-7xl font-semibold tracking-tight text-gold-shimmer leading-[1.05]">
-              As above,
-              <br />
-              so below.
-            </h1>
-            <p className="mt-8 font-serif text-base md:text-lg text-foreground/60 italic max-w-md mx-auto">
-              In den beginne was de Maat.
-              <br />
-              <span className="text-gold/60 not-italic font-mono text-xs tracking-[0.3em] uppercase mt-3 block">
-                Quod superius, sicut inferius
-              </span>
-            </p>
-
-            <div className="mt-12 flex items-center justify-center gap-8 text-gold/40">
-              <Ankh size={28} />
-              <EyeOfHorus size={28} />
-              <FeatherMaat size={28} />
-            </div>
-
-            <p className="mt-16 font-mono text-[0.65rem] uppercase tracking-[0.4em] text-foreground/40 animate-pulse">
-              ↓ daal af ↓
-            </p>
-          </div>
-        </section>
+        {/* ============= 1. HERO ============= */}
+        <HeroSection />
 
         {/* ============= 2. PYRAMID BUILD (6 vh, no own bg, canvas drives visual) =============
             Inside this section the user scrolls and the 3D pyramid behind builds itself.
@@ -156,12 +129,15 @@ export default function Home() {
         </section>
 
         {/* ============= 3. OUTRO + LOGIN ENTRY (1.5 vh) ============= */}
-        <section className="min-h-[120vh] flex flex-col items-center justify-center px-6 text-center relative">
-          <div className="papyrus glyph-border rounded-sm p-12 max-w-lg backdrop-blur-md relative overflow-hidden">
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-gold/30">
-              <FlowerOfLife size={120} />
+        <section className="min-h-[120vh] flex flex-col items-center justify-center px-6 text-center relative z-20">
+          {/* Flower of Life floats above the card — kept outside so it never clips */}
+          <div className="relative -mb-10 z-40 flex justify-center pointer-events-none">
+            <div className="text-gold/35">
+              <FlowerOfLife size={110} />
             </div>
+          </div>
 
+          <div className="papyrus glyph-border rounded-sm pt-14 pb-12 px-12 max-w-lg backdrop-blur-md relative z-30">
             <p className="font-mono text-[0.7rem] uppercase tracking-[0.5em] text-gold/70 mb-4">
               Sanctum Sanctorum
             </p>
@@ -172,12 +148,7 @@ export default function Home() {
               Voorbij deze drempel spreekt Hermes. Toegang via passkey —
               herkend door alles, gedragen door niemand.
             </p>
-            <Link
-              href="/sanctum"
-              className="inline-block px-10 py-4 border border-gold/60 text-gold hover:bg-gold hover:text-ink transition-all font-mono text-sm tracking-[0.3em] uppercase"
-            >
-              Inloggen
-            </Link>
+            <SanctumLoginButton />
           </div>
         </section>
       </main>

@@ -54,6 +54,13 @@
   --font-display: var(--font-cinzel), serif;
   --font-serif: var(--font-marcellus), serif;
   --font-mono: var(--font-jetbrains), monospace;
+  --animate-spin-slow: spin 12s linear infinite;
+  --animate-spin-reverse: spin-reverse 16s linear infinite;
+}
+
+@keyframes spin-reverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
 }
 
 html {
