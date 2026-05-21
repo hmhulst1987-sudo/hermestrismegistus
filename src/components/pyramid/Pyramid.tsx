@@ -49,6 +49,9 @@ function generatePyramidBlocks(): BlockData[] {
 
         if (inChamber || inTunnel) continue;
 
+        // Variant bias: 70% sandstone (smooth), 8% hieroglyph (rare accent), 22% eroded
+        const r = Math.random();
+        const variant = r < 0.08 ? 1 : r < 0.30 ? 2 : 0;
         blocks.push({
           position: new THREE.Vector3(x, y, z),
           spawn: new THREE.Vector3(
@@ -57,9 +60,9 @@ function generatePyramidBlocks(): BlockData[] {
             z + (Math.random() - 0.5) * 10
           ),
           buildOrder: order++,
-          variant: Math.floor(Math.random() * 3),
-          rot: (Math.random() - 0.5) * 0.08,
-          scale: 0.98 + Math.random() * 0.02,
+          variant,
+          rot: (Math.random() - 0.5) * 0.15,
+          scale: 0.92 + Math.random() * 0.08,
         });
       }
     }
@@ -93,9 +96,10 @@ export function Pyramid({
 }) {
   const groupRef = useRef<THREE.Group>(null!);
 
+  // Three variants — sandstone block (primary), hieroglyph (rare accent), eroded (mid-frequency)
   const [texSmooth, texGlyph, texEroded] = useLoader(TextureLoader, [
-    "/textures/stone-smooth.png",
-    "/textures/stone-hieroglyph.png",
+    "/textures/stone-sandstone.png",
+    "/textures/stone-hieroglyph-v2.png",
     "/textures/stone-eroded.png",
   ]);
 
@@ -103,7 +107,9 @@ export function Pyramid({
     t.colorSpace = SRGBColorSpace;
     t.wrapS = RepeatWrapping;
     t.wrapT = RepeatWrapping;
-    t.anisotropy = 8;
+    t.anisotropy = 16;
+    // Each block face shows one tile of the texture for proper detail
+    t.repeat.set(1, 1);
   }
 
   const blocks = useMemo(() => generatePyramidBlocks(), []);
@@ -178,9 +184,10 @@ export function Pyramid({
           <boxGeometry args={[BLOCK_SIZE, BLOCK_HEIGHT, BLOCK_SIZE]} />
           <meshStandardMaterial
             map={[texSmooth, texGlyph, texEroded][v]}
-            color="#e2c894"
-            roughness={0.9}
-            metalness={0.05}
+            color="#ffffff"
+            roughness={v === 1 ? 0.75 : 0.92}
+            metalness={0.02}
+            envMapIntensity={0.6}
           />
         </instancedMesh>
       ))}

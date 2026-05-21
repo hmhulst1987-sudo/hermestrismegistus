@@ -173,29 +173,110 @@ function PyramidBeat({
   side: "left" | "right" | "center";
   withGlyph?: React.ReactNode;
 }) {
-  const align =
-    side === "left"
-      ? "md:items-start md:text-left md:pl-[8%]"
-      : side === "right"
-      ? "md:items-end md:text-right md:pr-[8%]"
-      : "items-center text-center";
+  const positionClass =
+    side === "right" ? "ml-auto" : side === "center" ? "mx-auto" : "";
 
   return (
     <div className="min-h-screen flex items-center px-6">
       <div
-        className={`papyrus glyph-border rounded-sm p-8 md:p-10 max-w-md backdrop-blur-md ${
-          side === "right" ? "ml-auto" : side === "center" ? "mx-auto" : ""
-        } ${align} flex flex-col gap-3`}
+        className={`relative max-w-lg ${positionClass}`}
+        style={{ padding: "44px 36px 44px 36px" }}
       >
-        {withGlyph && <div className="text-gold/60 mb-2">{withGlyph}</div>}
-        <p className="font-mono text-[0.65rem] uppercase tracking-[0.4em] text-gold/70">
-          {eyebrow}
-        </p>
-        <h3 className="font-display text-2xl md:text-3xl font-semibold text-gold-shimmer leading-tight">
-          {title}
-        </h3>
-        <div className="text-foreground/75 leading-relaxed text-base mt-2">
-          {body}
+        {/* Card surface — deep parchment with gold inner glow */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(1200px 600px at 30% 20%, rgba(184,153,104,0.10), transparent 50%), radial-gradient(800px 500px at 70% 80%, rgba(196,71,71,0.06), transparent 50%), rgba(13,10,6,0.78)",
+            backdropFilter: "blur(10px)",
+            boxShadow:
+              "0 0 60px rgba(212,175,55,0.08) inset, 0 0 0 1px rgba(212,175,55,0.18) inset, 0 30px 60px rgba(0,0,0,0.5)",
+          }}
+        />
+
+        {/* Four ornate corners */}
+        {(["tl", "tr", "bl", "br"] as const).map((corner) => {
+          const rot = corner === "tl" ? 0 : corner === "tr" ? 90 : corner === "br" ? 180 : 270;
+          const pos =
+            corner === "tl"
+              ? { top: -6, left: -6 }
+              : corner === "tr"
+              ? { top: -6, right: -6 }
+              : corner === "br"
+              ? { bottom: -6, right: -6 }
+              : { bottom: -6, left: -6 };
+          return (
+            <img
+              key={corner}
+              src="/ornaments/corner.png"
+              alt=""
+              aria-hidden
+              style={{
+                position: "absolute",
+                width: 80,
+                height: 80,
+                transform: `rotate(${rot}deg)`,
+                opacity: 0.85,
+                pointerEvents: "none",
+                filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))",
+                ...pos,
+              }}
+            />
+          );
+        })}
+
+        {/* Inner content */}
+        <div
+          className="relative flex flex-col gap-4"
+          style={{
+            textAlign: side === "right" ? "right" : side === "center" ? "center" : "left",
+          }}
+        >
+          {withGlyph && <div className="text-gold/60 mb-2">{withGlyph}</div>}
+
+          {/* Eyebrow with twin micro-ankhs */}
+          <div
+            className="font-mono text-[0.65rem] uppercase tracking-[0.4em] text-gold/80"
+            style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: side === "center" ? "center" : side === "right" ? "flex-end" : "flex-start" }}
+          >
+            <span style={{ opacity: 0.5 }}>☥</span>
+            <span>{eyebrow}</span>
+            <span style={{ opacity: 0.5 }}>☥</span>
+          </div>
+
+          <h3
+            className="font-display text-2xl md:text-3xl font-semibold text-gold-shimmer"
+            style={{ letterSpacing: "-0.01em", lineHeight: 1.15 }}
+          >
+            {title}
+          </h3>
+
+          {/* Horizontal divider ornament */}
+          <div
+            aria-hidden
+            style={{
+              display: "flex",
+              justifyContent: side === "center" ? "center" : side === "right" ? "flex-end" : "flex-start",
+              margin: "4px 0 8px",
+            }}
+          >
+            <img
+              src="/ornaments/divider.png"
+              alt=""
+              style={{ height: 24, width: "auto", opacity: 0.9 }}
+            />
+          </div>
+
+          <div
+            className="text-foreground/80 leading-relaxed"
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: 16,
+              lineHeight: 1.7,
+            }}
+          >
+            {body}
+          </div>
         </div>
       </div>
     </div>

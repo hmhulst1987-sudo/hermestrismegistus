@@ -26,8 +26,9 @@ export function PyramidScene({
 }) {
   return (
     <group>
-      {/* Procedural Egyptian sky — no CDN fetch, instant render */}
-      <DesertSky progressRef={progressRef} />
+      {/* Sky now comes from HDR Environment in Scene3D — procedurals disabled.
+          NightSky still adds stars overlay near apex transition. */}
+      {/* <DesertSky progressRef={progressRef} /> */}
       <NightSky progressRef={progressRef} />
 
       {/* Khafre + Menkaure on the horizon */}
@@ -37,58 +38,84 @@ export function PyramidScene({
       <group position={[0, -PYRAMID_DROP, 0]}>
         <Pyramid progressRef={progressRef} />
         <Capstone progressRef={progressRef} apexY={PYRAMID_APEX_Y / 2 + 0.1} />
-        <InnerChamber />
+        <InnerChamber progressRef={progressRef} />
       </group>
       <CameraRig progressRef={progressRef} />
     </group>
   );
 }
 
-function InnerChamber() {
+function InnerChamber({ progressRef }: { progressRef: React.RefObject<number> }) {
   const FLOOR_WORLD_Y = -(PYRAMID_APEX_Y / 2);
-  
-  // Create an atmospheric light in the center of the chamber
+  const groupRef = useRef<THREE.Group>(null!);
+  const lightRef = useRef<THREE.PointLight>(null!);
+  const arkRef = useRef<THREE.Mesh>(null!);
+  const sealRef = useRef<THREE.Mesh>(null!);
+  const scrollLRef = useRef<THREE.Mesh>(null!);
+  const scrollRRef = useRef<THREE.Mesh>(null!);
+
+  // Fade chamber in only as the camera approaches the tunnel (p > 0.85)
+  useFrame(() => {
+    const p = progressRef.current ?? 0;
+    const fade = THREE.MathUtils.clamp((p - 0.85) / 0.10, 0, 1);
+    const visible = fade > 0.001;
+    if (groupRef.current) groupRef.current.visible = visible;
+    if (lightRef.current) lightRef.current.intensity = fade * 0.8;
+    const setOp = (m: THREE.Mesh | null, base: number) => {
+      if (!m) return;
+      const mat = m.material as THREE.MeshBasicMaterial | THREE.MeshStandardMaterial;
+      if (mat) {
+        mat.transparent = true;
+        mat.opacity = fade * base;
+      }
+    };
+    setOp(arkRef.current, 1.0);
+    setOp(sealRef.current, 0.6);
+    setOp(scrollLRef.current, 0.8);
+    setOp(scrollRRef.current, 0.8);
+  });
+
   return (
-    <group position={[0, FLOOR_WORLD_Y + 0.5, 0]}>
-      {/* Dim point light illuminating the ark */}
-      <pointLight position={[0, 1.5, 0]} intensity={0.8} color="#f5d76e" distance={5} />
-      
-      {/* Floor seal */}
+    <group ref={groupRef} position={[0, FLOOR_WORLD_Y + 0.5, 0]} visible={false}>
+      <pointLight ref={lightRef} position={[0, 1.5, 0]} intensity={0} color="#f5d76e" distance={5} />
+
       <DreiImage
+        ref={sealRef}
         url="/images/seal-floor-engraved.png"
         transparent
         position={[0, 0.01, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
         scale={[1.5, 1.5]}
-        opacity={0.6}
+        opacity={0}
       />
-      
-      {/* The Ark of the Covenant */}
+
       <DreiImage
+        ref={arkRef}
         url="/images/ark-covenant.png"
         transparent
         position={[0, 0.6, 0]}
-        rotation={[0, Math.PI / 2, 0]} // Face the +X axis (camera)
+        rotation={[0, Math.PI / 2, 0]}
         scale={[1.2, 1.2]}
+        opacity={0}
       />
-      
-      {/* Dead Sea Scrolls on walls (left and right from camera perspective) */}
-      {/* Camera is looking down -X, so left is -Z and right is +Z */}
+
       <DreiImage
+        ref={scrollLRef}
         url="/images/dead-sea-scroll.png"
         transparent
-        position={[0, 1.2, -1.6]} // Left wall
-        rotation={[0, 0, 0]} // Faces +Z, so it faces inward
+        position={[0, 1.2, -1.6]}
+        rotation={[0, 0, 0]}
         scale={[1.0, 0.5]}
-        opacity={0.8}
+        opacity={0}
       />
       <DreiImage
+        ref={scrollRRef}
         url="/images/dead-sea-scroll.png"
         transparent
-        position={[0, 1.2, 1.6]} // Right wall
-        rotation={[0, Math.PI, 0]} // Faces -Z, so it faces inward
-        scale={[-1.0, 0.5]} // flipped horizontally
-        opacity={0.8}
+        position={[0, 1.2, 1.6]}
+        rotation={[0, Math.PI, 0]}
+        scale={[-1.0, 0.5]}
+        opacity={0}
       />
     </group>
   );

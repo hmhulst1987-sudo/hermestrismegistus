@@ -99,11 +99,43 @@ export function DesertGround() {
     return new THREE.SphereGeometry(1, 64, 32, 0, Math.PI * 2, 0, Math.PI / 2);
   }, []);
 
-  // Giza plateau limestone — pale warm beige, not Moroccan orange
+  // Procedural sand micro-bump — no external asset, gives realistic grain detail
+  const sandBump = useMemo(() => {
+    if (typeof document === "undefined") return null;
+    const size = 512;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    const img = ctx.createImageData(size, size);
+    for (let i = 0; i < img.data.length; i += 4) {
+      // soft grain + occasional brighter sand crystal
+      const base = 110 + Math.random() * 80;
+      const speckle = Math.random() < 0.02 ? 220 : 0;
+      const v = Math.min(255, base + speckle);
+      img.data[i] = v;
+      img.data[i + 1] = v;
+      img.data[i + 2] = v;
+      img.data[i + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(24, 24);
+    tex.anisotropy = 8;
+    return tex;
+  }, []);
+
+  // Warm Giza plateau limestone, with the HDR environment doing the heavy lifting for tone
   const sandProps = {
     color: "#c8b07a",
-    roughness: 0.92,
-    metalness: 0.03,
+    roughness: 0.95,
+    metalness: 0.02,
+    bumpMap: sandBump ?? undefined,
+    bumpScale: 0.04,
+    envMapIntensity: 0.55,
   };
 
   return (
@@ -128,9 +160,10 @@ export function DesertGround() {
           rotation={[0, d.rotY, 0]}
           receiveShadow
         >
-          <meshStandardMaterial {...sandProps} color="#bca46a" />
+          <meshStandardMaterial {...sandProps} color="#bca46a" bumpScale={0.07} />
         </mesh>
       ))}
+
     </group>
   );
 }

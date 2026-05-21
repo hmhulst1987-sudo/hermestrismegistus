@@ -1,7 +1,9 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
+import { Environment } from "@react-three/drei";
 import { Suspense, useRef, useEffect, type ReactNode } from "react";
+import * as THREE from "three";
 
 /**
  * Single fixed full-viewport canvas for the whole site.
@@ -42,27 +44,37 @@ export function Scene3D({ children }: { children?: ReactNode }) {
     <div ref={containerRef} className="fixed inset-0 z-0 pointer-events-none">
       <Canvas
         camera={{ position: [0, 4, 16], fov: 42 }}
-        dpr={[1, 1.5]}
+        dpr={[1, 2]}
         gl={{
           antialias: true,
           alpha: false,
-          powerPreference: "default",
-          toneMappingExposure: 1.0,
+          powerPreference: "high-performance",
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.05,
+          outputColorSpace: THREE.SRGBColorSpace,
         }}
         shadows
       >
-        {/* Pale limestone haze */}
-        <fog attach="fog" args={["#ddd4b0", 45, 110]} />
+        {/* Atmospheric haze — denser at the horizon, deeper distance for HDR feel */}
+        <fog attach="fog" args={["#e6d5a8", 60, 150]} />
 
         <Suspense fallback={null}>
-          {/* Egyptian noon sun */}
+          {/* Real-world HDR environment: gives skybox + image-based lighting */}
+          <Environment
+            files="/hdri/desert.exr"
+            background
+            backgroundBlurriness={0.15}
+            environmentIntensity={1.0}
+          />
+
+          {/* Direct sun for crisp shadows on the pyramid */}
           <directionalLight
-            position={[6, 16, 5]}
-            intensity={2.2}
-            color="#fff8e8"
+            position={[8, 18, 6]}
+            intensity={1.6}
+            color="#fff4d6"
             castShadow
-            shadow-mapSize-width={1024}
-            shadow-mapSize-height={1024}
+            shadow-mapSize-width={2048}
+            shadow-mapSize-height={2048}
             shadow-camera-near={0.5}
             shadow-camera-far={80}
             shadow-camera-left={-20}
@@ -70,13 +82,11 @@ export function Scene3D({ children }: { children?: ReactNode }) {
             shadow-camera-top={20}
             shadow-camera-bottom={-20}
             shadow-bias={-0.0004}
+            shadow-radius={4}
           />
 
-          {/* Sky bounce */}
-          <hemisphereLight color="#5888cc" groundColor="#c8a860" intensity={0.45} />
-
-          {/* Minimal ambient */}
-          <ambientLight intensity={0.10} />
+          {/* Subtle fill — desert reflected light from the ground */}
+          <hemisphereLight color="#fce8b4" groundColor="#7a5a30" intensity={0.25} />
 
           {children}
         </Suspense>
